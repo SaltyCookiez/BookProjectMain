@@ -124,15 +124,48 @@ module.exports = app => {
   router.post("/", async (req, res) => {
     console.log('Received POST request to create book:', req.body);
     try {
-      // Validate required fields
-      if (!req.body.title) {
-        return res.status(400).json({ message: "Title is required" });
+      // Validate required fields and data types
+      const validationErrors = [];
+      
+      if (!req.body.title || req.body.title.trim() === '') {
+        validationErrors.push({ field: 'title', message: 'Title is required' });
       }
+      
       if (!req.body.authorId) {
-        return res.status(400).json({ message: "Author ID is required" });
+        validationErrors.push({ field: 'authorId', message: 'Author ID is required' });
+      }
+      
+      const currentYear = new Date().getFullYear();
+      if (req.body.publishedYear && (req.body.publishedYear < 1000 || req.body.publishedYear > currentYear)) {
+        validationErrors.push({ 
+          field: 'publishedYear', 
+          message: `Published year must be between 1000 and ${currentYear}` 
+        });
+      }
+      
+      if (req.body.price && req.body.price < 0) {
+        validationErrors.push({ field: 'price', message: 'Price cannot be negative' });
       }
 
-      const book = await Book.create(req.body);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({
+          message: 'Validation error',
+          errors: validationErrors
+        });
+      }
+
+      // Clean and prepare the data
+      const bookData = {
+        title: req.body.title.trim(),
+        isbn: req.body.isbn ? req.body.isbn.trim() : null,
+        publishedYear: req.body.publishedYear || null,
+        description: req.body.description ? req.body.description.trim() : null,
+        price: parseFloat(req.body.price) || 0,
+        authorId: parseInt(req.body.authorId)
+      };
+
+      // Create the book
+      const book = await Book.create(bookData);
       console.log('Book created successfully:', book);
       res.json(book);
     } catch (err) {
