@@ -2,5 +2,7 @@
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/c4edb0c7-c294-42eb-9eba-713d52686b50/resourceGroups/BookProjectMain_group-94b4/providers/Microsoft.Web/sites/BookProjectMain",
+    "appService.deploySubpath": "."
 }
