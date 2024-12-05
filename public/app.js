@@ -111,11 +111,21 @@ async function saveBook() {
     const bookData = {
         title: document.getElementById('bookTitle').value,
         isbn: document.getElementById('bookIsbn').value,
-        publishedYear: document.getElementById('bookYear').value,
+        publishedYear: parseInt(document.getElementById('bookYear').value) || null,
         description: document.getElementById('bookDescription').value,
-        price: document.getElementById('bookPrice').value,
-        authorId: document.getElementById('bookAuthor').value
+        price: parseFloat(document.getElementById('bookPrice').value) || 0,
+        authorId: parseInt(document.getElementById('bookAuthor').value)
     };
+
+    // Validate required fields
+    if (!bookData.title) {
+        alert('Title is required');
+        return;
+    }
+    if (!bookData.authorId) {
+        alert('Please select an author');
+        return;
+    }
 
     try {
         const url = bookId ? `${BOOKS_API}/${bookId}` : BOOKS_API;
@@ -132,24 +142,33 @@ async function saveBook() {
             body: JSON.stringify(bookData)
         });
 
+        const data = await response.json();
+        
         if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
             console.error('Server error:', {
                 status: response.status,
                 statusText: response.statusText,
-                errorData
+                data
             });
-            alert(`Failed to save book. Status: ${response.status}. Please check console for details.`);
+            
+            let errorMessage = 'Failed to save book. ';
+            if (data.errors) {
+                errorMessage += data.errors.map(e => `${e.field}: ${e.message}`).join(', ');
+            } else if (data.message) {
+                errorMessage += data.message;
+            }
+            
+            alert(errorMessage);
             return;
         }
 
-        const savedBook = await response.json();
-        console.log('Book saved successfully:', savedBook);
+        console.log('Book saved successfully:', data);
+        document.getElementById('bookForm').reset();
         bookModal.hide();
-        loadBooks();
+        await loadBooks();
     } catch (error) {
         console.error('Error saving book:', error);
-        alert('Failed to save book. Please check console for details.');
+        alert('Network error while saving book. Please check your connection and try again.');
     }
 }
 

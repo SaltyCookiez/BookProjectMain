@@ -47,19 +47,27 @@
                     <input type="hidden" id="bookId">
                     <div class="mb-3">
                         <label class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" required>
+                        <input type="text" class="form-control" id="bookTitle" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">ISBN</label>
-                        <input type="text" class="form-control" id="isbn">
+                        <input type="text" class="form-control" id="bookIsbn">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Published Year</label>
-                        <input type="number" class="form-control" id="publishedYear">
+                        <input type="number" class="form-control" id="bookYear">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="bookDescription"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" step="0.01" class="form-control" id="bookPrice">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Author</label>
-                        <select class="form-control" id="authorSelect" required>
+                        <select class="form-control" id="bookAuthor" required>
                             <option value="">Select an author</option>
                         </select>
                     </div>
@@ -195,10 +203,12 @@
                 const book = await response.json();
                 
                 document.getElementById('bookId').value = book.id;
-                document.getElementById('title').value = book.title;
-                document.getElementById('isbn').value = book.isbn || '';
-                document.getElementById('publishedYear').value = book.publishedYear || '';
-                document.getElementById('authorSelect').value = book.authorId;
+                document.getElementById('bookTitle').value = book.title;
+                document.getElementById('bookIsbn').value = book.isbn || '';
+                document.getElementById('bookYear').value = book.publishedYear || '';
+                document.getElementById('bookDescription').value = book.description || '';
+                document.getElementById('bookPrice').value = book.price || '';
+                document.getElementById('bookAuthor').value = book.authorId;
                 
                 document.getElementById('bookFormTitle').textContent = 'Edit Book';
                 document.getElementById('bookSubmitBtn').textContent = 'Update Book';
@@ -295,10 +305,12 @@
         document.getElementById('bookForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const bookData = {
-                title: document.getElementById('title').value,
-                isbn: document.getElementById('isbn').value,
-                publishedYear: document.getElementById('publishedYear').value,
-                authorId: document.getElementById('authorSelect').value
+                title: document.getElementById('bookTitle').value,
+                isbn: document.getElementById('bookIsbn').value,
+                publishedYear: document.getElementById('bookYear').value,
+                description: document.getElementById('bookDescription').value,
+                price: document.getElementById('bookPrice').value,
+                authorId: document.getElementById('bookAuthor').value
             };
             
             try {
