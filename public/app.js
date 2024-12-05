@@ -121,20 +121,35 @@ async function saveBook() {
         const url = bookId ? `${BOOKS_API}/${bookId}` : BOOKS_API;
         const method = bookId ? 'PUT' : 'POST';
         
+        console.log('Sending book data:', { url, method, bookData });
+        
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify(bookData)
         });
 
-        if (response.ok) {
-            bookModal.hide();
-            loadBooks();
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            console.error('Server error:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorData
+            });
+            alert(`Failed to save book. Status: ${response.status}. Please check console for details.`);
+            return;
         }
+
+        const savedBook = await response.json();
+        console.log('Book saved successfully:', savedBook);
+        bookModal.hide();
+        loadBooks();
     } catch (error) {
         console.error('Error saving book:', error);
+        alert('Failed to save book. Please check console for details.');
     }
 }
 
@@ -224,21 +239,45 @@ async function saveAuthor() {
         const url = authorId ? `${AUTHORS_API}/${authorId}` : AUTHORS_API;
         const method = authorId ? 'PUT' : 'POST';
         
+        console.log('Sending author data:', { url, method, authorData });
+        
         const response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify(authorData)
         });
 
-        if (response.ok) {
-            authorModal.hide();
-            loadAuthors();
-            loadAuthorsForSelect(); // Refresh the authors select in book form
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error('Server error:', {
+                status: response.status,
+                statusText: response.statusText,
+                data
+            });
+            
+            let errorMessage = 'Failed to save author. ';
+            if (data.errors) {
+                errorMessage += data.errors.map(e => `${e.field}: ${e.message}`).join(', ');
+            } else if (data.message) {
+                errorMessage += data.message;
+            }
+            
+            alert(errorMessage);
+            return;
         }
+
+        console.log('Author saved successfully:', data);
+        document.getElementById('authorForm').reset();
+        authorModal.hide();
+        await loadAuthors();
+        await loadAuthorsForSelect();
     } catch (error) {
         console.error('Error saving author:', error);
+        alert('Network error while saving author. Please check your connection and try again.');
     }
 }
 

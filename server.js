@@ -8,7 +8,14 @@ const db = require("./models");
 
 const app = express();
 
-app.use(cors());
+// CORS Configuration
+app.use(cors({
+  origin: true, // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,6 +32,20 @@ require("./routes/author.routes")(app);
 // Simple route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to Book Management application." });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
+// Handle 404
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
 // Sync database

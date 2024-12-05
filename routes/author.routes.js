@@ -111,62 +111,107 @@ module.exports = app => {
 
   // Create a new Author
   router.post("/", async (req, res) => {
+    console.log('Received POST request to create author:', req.body);
     try {
       const author = await Author.create(req.body);
+      console.log('Author created successfully:', author);
       res.json(author);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error creating author:', err);
+      if (err.name === 'SequelizeValidationError') {
+        return res.status(400).json({
+          message: 'Validation error',
+          errors: err.errors.map(e => ({ field: e.path, message: e.message }))
+        });
+      }
+      res.status(500).json({ 
+        message: 'Error creating author',
+        error: err.message 
+      });
     }
   });
 
   // Get all Authors
   router.get("/", async (req, res) => {
+    console.log('Received GET request for all authors');
     try {
       const authors = await Author.findAll({ include: ["books"] });
+      console.log(`Found ${authors.length} authors`);
       res.json(authors);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error fetching authors:', err);
+      res.status(500).json({ 
+        message: 'Error fetching authors',
+        error: err.message 
+      });
     }
   });
 
   // Get Author by id
   router.get("/:id", async (req, res) => {
+    console.log('Received GET request for author:', req.params.id);
     try {
       const author = await Author.findByPk(req.params.id, { include: ["books"] });
       if (!author) {
+        console.log('Author not found:', req.params.id);
         return res.status(404).json({ message: "Author not found" });
       }
+      console.log('Found author:', author);
       res.json(author);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error fetching author:', err);
+      res.status(500).json({ 
+        message: 'Error fetching author',
+        error: err.message 
+      });
     }
   });
 
   // Update Author
   router.put("/:id", async (req, res) => {
+    console.log('Received PUT request for author:', req.params.id, req.body);
     try {
       const author = await Author.findByPk(req.params.id);
       if (!author) {
+        console.log('Author not found for update:', req.params.id);
         return res.status(404).json({ message: "Author not found" });
       }
       await author.update(req.body);
+      console.log('Author updated successfully:', author);
       res.json(author);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error updating author:', err);
+      if (err.name === 'SequelizeValidationError') {
+        return res.status(400).json({
+          message: 'Validation error',
+          errors: err.errors.map(e => ({ field: e.path, message: e.message }))
+        });
+      }
+      res.status(500).json({ 
+        message: 'Error updating author',
+        error: err.message 
+      });
     }
   });
 
   // Delete Author
   router.delete("/:id", async (req, res) => {
+    console.log('Received DELETE request for author:', req.params.id);
     try {
       const author = await Author.findByPk(req.params.id);
       if (!author) {
+        console.log('Author not found for deletion:', req.params.id);
         return res.status(404).json({ message: "Author not found" });
       }
       await author.destroy();
+      console.log('Author deleted successfully:', req.params.id);
       res.json({ message: "Author deleted successfully" });
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      console.error('Error deleting author:', err);
+      res.status(500).json({ 
+        message: 'Error deleting author',
+        error: err.message 
+      });
     }
   });
 

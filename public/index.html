@@ -82,16 +82,21 @@
         </div>
     </div>
 
+    <script>
+        // API endpoints - automatically use the current domain
+        const API_URL = window.location.origin + '/api';
+        const BOOKS_API = `${API_URL}/books`;
+        const AUTHORS_API = `${API_URL}/authors`;
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_URL = 'http://localhost:5000/api';
         let editingAuthorId = null;
         let editingBookId = null;
 
         // Load authors
         async function loadAuthors() {
             try {
-                const response = await fetch(`${API_URL}/authors`);
+                const response = await fetch(`${AUTHORS_API}`);
                 const authors = await response.json();
                 const select = document.getElementById('authorSelect');
                 const authorsList = document.getElementById('authorsList');
@@ -131,7 +136,7 @@
         // Load books
         async function loadBooks() {
             try {
-                const response = await fetch(`${API_URL}/books`);
+                const response = await fetch(`${BOOKS_API}`);
                 const books = await response.json();
                 const booksList = document.getElementById('booksList');
                 
@@ -166,7 +171,7 @@
         // Edit author
         async function editAuthor(id) {
             try {
-                const response = await fetch(`${API_URL}/authors/${id}`);
+                const response = await fetch(`${AUTHORS_API}/${id}`);
                 const author = await response.json();
                 
                 document.getElementById('authorId').value = author.id;
@@ -186,7 +191,7 @@
         // Edit book
         async function editBook(id) {
             try {
-                const response = await fetch(`${API_URL}/books/${id}`);
+                const response = await fetch(`${BOOKS_API}/${id}`);
                 const book = await response.json();
                 
                 document.getElementById('bookId').value = book.id;
@@ -208,7 +213,7 @@
         async function deleteAuthor(id) {
             if (confirm('Are you sure you want to delete this author? This will also delete all their books.')) {
                 try {
-                    await fetch(`${API_URL}/authors/${id}`, {
+                    await fetch(`${AUTHORS_API}/${id}`, {
                         method: 'DELETE'
                     });
                     loadAuthors();
@@ -223,7 +228,7 @@
         async function deleteBook(id) {
             if (confirm('Are you sure you want to delete this book?')) {
                 try {
-                    await fetch(`${API_URL}/books/${id}`, {
+                    await fetch(`${BOOKS_API}/${id}`, {
                         method: 'DELETE'
                     });
                     loadBooks();
@@ -264,8 +269,8 @@
             
             try {
                 const url = editingAuthorId 
-                    ? `${API_URL}/authors/${editingAuthorId}`
-                    : `${API_URL}/authors`;
+                    ? `${AUTHORS_API}/${editingAuthorId}`
+                    : `${AUTHORS_API}`;
                 
                 const method = editingAuthorId ? 'PUT' : 'POST';
                 
@@ -298,8 +303,8 @@
             
             try {
                 const url = editingBookId 
-                    ? `${API_URL}/books/${editingBookId}`
-                    : `${API_URL}/books`;
+                    ? `${BOOKS_API}/${editingBookId}`
+                    : `${BOOKS_API}`;
                 
                 const method = editingBookId ? 'PUT' : 'POST';
                 
