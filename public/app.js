@@ -1,5 +1,5 @@
 // API endpoints
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.location.origin + '/api';
 const BOOKS_API = `${API_URL}/books`;
 const AUTHORS_API = `${API_URL}/authors`;
 
