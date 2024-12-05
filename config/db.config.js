@@ -1,10 +1,14 @@
 module.exports = {
-  HOST: "localhost",  // Using IP instead of localhost
-  USER: "root",
-  PASSWORD: "12345",
+  HOST: "bookprojectmain-server.mysql.database.azure.com",
+  USER: "tfykinpshu",
+  PASSWORD: "ygAPVA7ZeKg8tNx$",
   DB: "bookdb",
   dialect: "mysql",
-  port: 3307,
+  dialectOptions: {
+    ssl: {
+      require: true
+    }
+  },
   pool: {
     max: 5,
     min: 0,
