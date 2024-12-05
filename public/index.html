@@ -131,6 +131,7 @@
                                             <button class="btn btn-sm btn-danger" onclick="deleteAuthor(${author.id})">Delete</button>
                                         </div>
                                     </div>
+                                    <p class="mt-2 mb-0">${author.biography || 'No biography available'}</p>
                                 </div>
                             </div>
                         `;
@@ -305,21 +306,61 @@
         document.getElementById('bookForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const bookData = {
+                title: document.getElementById('bookTitle').value.trim(),
+                isbn: document.getElementById('bookIsbn').value.trim() || null,
+                publishedYear: parseInt(document.getElementById('bookYear').value) || null,
+                description: document.getElementById('bookDescription').value.trim() || null,
+                price: parseFloat(document.getElementById('bookPrice').value) || 0,
+                authorId: parseInt(document.getElementById('bookAuthor').value)
+            };
+
+            console.log('Form data collected:', {
                 title: document.getElementById('bookTitle').value,
                 isbn: document.getElementById('bookIsbn').value,
                 publishedYear: document.getElementById('bookYear').value,
                 description: document.getElementById('bookDescription').value,
                 price: document.getElementById('bookPrice').value,
                 authorId: document.getElementById('bookAuthor').value
-            };
+            });
+            
+            console.log('Processed book data:', bookData);
+
+            // Validate required fields
+            if (!bookData.title) {
+                alert('Title is required');
+                return;
+            }
+            if (!bookData.authorId) {
+                alert('Please select an author');
+                return;
+            }
+
+            // Validate publishedYear
+            const currentYear = new Date().getFullYear();
+            if (bookData.publishedYear && (bookData.publishedYear < 1000 || bookData.publishedYear > currentYear)) {
+                alert(`Published year must be between 1000 and ${currentYear}`);
+                return;
+            }
+
+            // Validate price
+            if (bookData.price < 0) {
+                alert('Price cannot be negative');
+                return;
+            }
             
             try {
                 const url = editingBookId 
                     ? `${BOOKS_API}/${editingBookId}`
-                    : `${BOOKS_API}`;
+                    : BOOKS_API;
                 
                 const method = editingBookId ? 'PUT' : 'POST';
                 
+                console.log('Sending request:', {
+                    url,
+                    method,
+                    data: bookData
+                });
+
                 const response = await fetch(url, {
                     method: method,
                     headers: {
@@ -327,13 +368,23 @@
                     },
                     body: JSON.stringify(bookData)
                 });
-                
-                if (response.ok) {
-                    resetBookForm();
-                    loadBooks();
+
+                const data = await response.json();
+                console.log('Server response:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save book');
                 }
+
+                resetBookForm();
+                loadBooks();
             } catch (error) {
                 console.error('Error saving book:', error);
+                alert(error.message);
             }
         });
 
