@@ -106,36 +106,36 @@
             try {
                 const response = await fetch(`${AUTHORS_API}`);
                 const authors = await response.json();
-                const select = document.getElementById('authorSelect');
+                const select = document.getElementById('bookAuthor');
                 const authorsList = document.getElementById('authorsList');
                 
-                select.innerHTML = '<option value="">Select an author</option>';
-                authorsList.innerHTML = '';
+                if (select) {
+                    select.innerHTML = '<option value="">Select an author</option>';
+                    authors.forEach(author => {
+                        select.innerHTML += `
+                            <option value="${author.id}">${author.firstName} ${author.lastName}</option>
+                        `;
+                    });
+                }
                 
-                authors.forEach(author => {
-                    select.innerHTML += `
-                        <option value="${author.id}">${author.firstName} ${author.lastName}</option>
-                    `;
-                    
-                    authorsList.innerHTML += `
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5>${author.firstName} ${author.lastName}</h5>
-                                    <div>
-                                        <button class="btn btn-sm btn-primary" onclick="editAuthor(${author.id})">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteAuthor(${author.id})">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                if (authorsList) {
+                    authorsList.innerHTML = '';
+                    authors.forEach(author => {
+                        authorsList.innerHTML += `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5>${author.firstName} ${author.lastName}</h5>
+                                        <div>
+                                            <button class="btn btn-sm btn-primary" onclick="editAuthor(${author.id})">Edit</button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteAuthor(${author.id})">Delete</button>
+                                        </div>
                                     </div>
                                 </div>
-                                <p>${author.biography || 'No biography available'}</p>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
             } catch (error) {
                 console.error('Error loading authors:', error);
             }
