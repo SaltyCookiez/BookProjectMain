@@ -5,7 +5,10 @@ module.exports = {
   DB: "bookdb",
   dialect: "mysql",
   dialectOptions: {
-    ssl: true,
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    },
     connectTimeout: 60000
   },
   pool: {
