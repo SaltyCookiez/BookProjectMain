@@ -6,7 +6,8 @@ module.exports = {
   dialect: "mysql",
   dialectOptions: {
     ssl: {
-      require: true
+      require: true,
+      rejectUnauthorized: true
     }
   },
   pool: {
