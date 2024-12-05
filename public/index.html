@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Book Management System</h1>
+        
+        <!-- Author Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 id="authorFormTitle">Add Author</h3>
+            </div>
+            <div class="card-body">
+                <form id="authorForm">
+                    <input type="hidden" id="authorId">
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Biography</label>
+                        <textarea class="form-control" id="biography"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="authorSubmitBtn">Add Author</button>
+                    <button type="button" class="btn btn-secondary" id="authorCancelBtn" style="display: none;">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Book Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 id="bookFormTitle">Add Book</h3>
+            </div>
+            <div class="card-body">
+                <form id="bookForm">
+                    <input type="hidden" id="bookId">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ISBN</label>
+                        <input type="text" class="form-control" id="isbn">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Published Year</label>
+                        <input type="number" class="form-control" id="publishedYear">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Author</label>
+                        <select class="form-control" id="authorSelect" required>
+                            <option value="">Select an author</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="bookSubmitBtn">Add Book</button>
+                    <button type="button" class="btn btn-secondary" id="bookCancelBtn" style="display: none;">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Display Lists -->
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Authors</h3>
+                <div id="authorsList"></div>
+            </div>
+            <div class="col-md-6">
+                <h3>Books</h3>
+                <div id="booksList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let editingAuthorId = null;
+        let editingBookId = null;
+
+        // Load authors
+        async function loadAuthors() {
+            try {
+                const response = await fetch(`${API_URL}/authors`);
+                const authors = await response.json();
+                const select = document.getElementById('authorSelect');
+                const authorsList = document.getElementById('authorsList');
+                
+                select.innerHTML = '<option value="">Select an author</option>';
+                authorsList.innerHTML = '';
+                
+                authors.forEach(author => {
+                    select.innerHTML += `
+                        <option value="${author.id}">${author.firstName} ${author.lastName}</option>
+                    `;
+                    
+                    authorsList.innerHTML += `
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5>${author.firstName} ${author.lastName}</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary" onclick="editAuthor(${author.id})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteAuthor(${author.id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p>${author.biography || 'No biography available'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading authors:', error);
+            }
+        }
+
+        // Load books
+        async function loadBooks() {
+            try {
+                const response = await fetch(`${API_URL}/books`);
+                const books = await response.json();
+                const booksList = document.getElementById('booksList');
+                
+                booksList.innerHTML = '';
+                books.forEach(book => {
+                    booksList.innerHTML += `
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5>${book.title}</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-primary" onclick="editBook(${book.id})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p>ISBN: ${book.isbn || 'N/A'}</p>
+                                <p>Published: ${book.publishedYear || 'N/A'}</p>
+                                <p>Author: ${book.author ? `${book.author.firstName} ${book.author.lastName}` : 'Unknown'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading books:', error);
+            }
+        }
+
+        // Edit author
+        async function editAuthor(id) {
+            try {
+                const response = await fetch(`${API_URL}/authors/${id}`);
+                const author = await response.json();
+                
+                document.getElementById('authorId').value = author.id;
+                document.getElementById('firstName').value = author.firstName;
+                document.getElementById('lastName').value = author.lastName;
+                document.getElementById('biography').value = author.biography || '';
+                
+                document.getElementById('authorFormTitle').textContent = 'Edit Author';
+                document.getElementById('authorSubmitBtn').textContent = 'Update Author';
+                document.getElementById('authorCancelBtn').style.display = 'inline-block';
+                editingAuthorId = id;
+            } catch (error) {
+                console.error('Error fetching author:', error);
+            }
+        }
+
+        // Edit book
+        async function editBook(id) {
+            try {
+                const response = await fetch(`${API_URL}/books/${id}`);
+                const book = await response.json();
+                
+                document.getElementById('bookId').value = book.id;
+                document.getElementById('title').value = book.title;
+                document.getElementById('isbn').value = book.isbn || '';
+                document.getElementById('publishedYear').value = book.publishedYear || '';
+                document.getElementById('authorSelect').value = book.authorId;
+                
+                document.getElementById('bookFormTitle').textContent = 'Edit Book';
+                document.getElementById('bookSubmitBtn').textContent = 'Update Book';
+                document.getElementById('bookCancelBtn').style.display = 'inline-block';
+                editingBookId = id;
+            } catch (error) {
+                console.error('Error fetching book:', error);
+            }
+        }
+
+        // Delete author
+        async function deleteAuthor(id) {
+            if (confirm('Are you sure you want to delete this author? This will also delete all their books.')) {
+                try {
+                    await fetch(`${API_URL}/authors/${id}`, {
+                        method: 'DELETE'
+                    });
+                    loadAuthors();
+                    loadBooks();
+                } catch (error) {
+                    console.error('Error deleting author:', error);
+                }
+            }
+        }
+
+        // Delete book
+        async function deleteBook(id) {
+            if (confirm('Are you sure you want to delete this book?')) {
+                try {
+                    await fetch(`${API_URL}/books/${id}`, {
+                        method: 'DELETE'
+                    });
+                    loadBooks();
+                } catch (error) {
+                    console.error('Error deleting book:', error);
+                }
+            }
+        }
+
+        // Reset author form
+        function resetAuthorForm() {
+            document.getElementById('authorForm').reset();
+            document.getElementById('authorId').value = '';
+            document.getElementById('authorFormTitle').textContent = 'Add Author';
+            document.getElementById('authorSubmitBtn').textContent = 'Add Author';
+            document.getElementById('authorCancelBtn').style.display = 'none';
+            editingAuthorId = null;
+        }
+
+        // Reset book form
+        function resetBookForm() {
+            document.getElementById('bookForm').reset();
+            document.getElementById('bookId').value = '';
+            document.getElementById('bookFormTitle').textContent = 'Add Book';
+            document.getElementById('bookSubmitBtn').textContent = 'Add Book';
+            document.getElementById('bookCancelBtn').style.display = 'none';
+            editingBookId = null;
+        }
+
+        // Handle author form submission
+        document.getElementById('authorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const authorData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                biography: document.getElementById('biography').value
+            };
+            
+            try {
+                const url = editingAuthorId 
+                    ? `${API_URL}/authors/${editingAuthorId}`
+                    : `${API_URL}/authors`;
+                
+                const method = editingAuthorId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(authorData)
+                });
+                
+                if (response.ok) {
+                    resetAuthorForm();
+                    loadAuthors();
+                }
+            } catch (error) {
+                console.error('Error saving author:', error);
+            }
+        });
+
+        // Handle book form submission
+        document.getElementById('bookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bookData = {
+                title: document.getElementById('title').value,
+                isbn: document.getElementById('isbn').value,
+                publishedYear: document.getElementById('publishedYear').value,
+                authorId: document.getElementById('authorSelect').value
+            };
+            
+            try {
+                const url = editingBookId 
+                    ? `${API_URL}/books/${editingBookId}`
+                    : `${API_URL}/books`;
+                
+                const method = editingBookId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookData)
+                });
+                
+                if (response.ok) {
+                    resetBookForm();
+                    loadBooks();
+                }
+            } catch (error) {
+                console.error('Error saving book:', error);
+            }
+        });
+
+        // Handle cancel buttons
+        document.getElementById('authorCancelBtn').addEventListener('click', resetAuthorForm);
+        document.getElementById('bookCancelBtn').addEventListener('click', resetBookForm);
+
+        // Initial load
+        loadAuthors();
+        loadBooks();
+    </script>
+</body>
+</html>
