@@ -21,8 +21,8 @@ Enne selle rakenduse käivitamist veenduge, et olete installinud järgmise:
 ## Arenduskeskkona seadistamine
 
 Avame VS Code ja kirjutame:
-- git clone <projekti-repositoorium>
-- cd <projekti-kaust>
+- git clone "projekti-repositoorium"
+- cd "projekti-kaust"
 - npm install
 
 Looge ja seadistage MySQL andmebaas:
