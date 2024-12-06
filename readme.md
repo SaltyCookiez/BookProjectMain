@@ -17,3 +17,17 @@ Enne selle rakenduse käivitamist veenduge, et olete installinud järgmise:
 - Node.js (v12 või uuem)
 - MySQL server
 - npm (sõlme paketihaldur)
+
+## Arenduskeskkona seadistamine
+
+Avame VS Code ja kirjutame:
+- git clone <projekti-repositoorium>
+- cd <projekti-kaust>
+- npm install
+
+Looge ja seadistage MySQL andmebaas:
+- CREATE DATABASE bookdb;
+
+## Rakenduse käivitamine
+
+Rakenduse käivitamiseks avame "New Terminal" ja kirjutame: npm start
