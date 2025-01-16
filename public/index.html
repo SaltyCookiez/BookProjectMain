@@ -1,39 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="et">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Management System</title>
+    <title>Raamatuhaldussüsteem</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>Book Management System</h1>
-        
-        <!-- Author Form -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 id="authorFormTitle">Add Author</h3>
-            </div>
-            <div class="card-body">
-                <form id="authorForm">
-                    <input type="hidden" id="authorId">
-                    <div class="mb-3">
-                        <label class="form-label">First Name</label>
-                        <input type="text" class="form-control" id="firstName" required>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-book-open me-2"></i>Raamatuhaldus
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4 form-card">
+                    <div class="card-header">
+                        <h3 id="authorFormTitle" class="mb-0">
+                            <i class="fas fa-user-plus me-2"></i>Lisa Autor
+                        </h3>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Last Name</label>
-                        <input type="text" class="form-control" id="lastName" required>
+                    <div class="card-body">
+                        <form id="authorForm">
+                            <input type="hidden" id="authorId">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Eesnimi</label>
+                                    <input type="text" class="form-control" id="firstName" required placeholder="Sisesta eesnimi">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Perekonnanimi</label>
+                                    <input type="text" class="form-control" id="lastName" required placeholder="Sisesta perekonnanimi">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Biograafia</label>
+                                <textarea class="form-control" id="biography" rows="3" placeholder="Kirjuta autori lühibiograafia"></textarea>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary" id="authorSubmitBtn">
+                                    <i class="fas fa-save me-2"></i>Salvesta
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="authorCancelBtn" style="display: none;">
+                                    <i class="fas fa-times me-2"></i>Tühista
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Biography</label>
-                        <textarea class="form-control" id="biography"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="authorSubmitBtn">Add Author</button>
-                    <button type="button" class="btn btn-secondary" id="authorCancelBtn" style="display: none;">Cancel</button>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -71,21 +91,34 @@
                             <option value="">Select an author</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="bookSubmitBtn">Add Book</button>
-                    <button type="button" class="btn btn-secondary" id="bookCancelBtn" style="display: none;">Cancel</button>
-                </form>
+                </div>
             </div>
         </div>
 
-        <!-- Display Lists -->
         <div class="row">
             <div class="col-md-6">
-                <h3>Authors</h3>
-                <div id="authorsList"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fas fa-users me-2"></i>Autorid
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="authorsList" class="row"></div>
+                    </div>
+                </div>
             </div>
             <div class="col-md-6">
-                <h3>Books</h3>
-                <div id="booksList"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fas fa-book-reader me-2"></i>Raamatud
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="booksList" class="row"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -148,26 +181,28 @@
                 const response = await fetch(`${BOOKS_API}`);
                 const books = await response.json();
                 const booksList = document.getElementById('booksList');
-                
+
                 booksList.innerHTML = '';
                 books.forEach(book => {
                     booksList.innerHTML += `
-                        <div class="card mb-2">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5>${book.title}</h5>
-                                    <div>
-                                        <button class="btn btn-sm btn-primary" onclick="editBook(${book.id})">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5>${book.title}</h5>
+                                        <div>
+                                            <button class="btn btn-sm btn-primary" onclick="editBook(${book.id})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </div>
+                                    <p>ISBN: ${book.isbn || 'Puudub'}</p>
+                                    <p>Ilmumisaasta: ${book.publishedYear || 'Puudub'}</p>
+                                    <p>Autor: ${book.author ? `${book.author.firstName} ${book.author.lastName}` : 'Tundmatu'}</p>
                                 </div>
-                                <p>ISBN: ${book.isbn || 'N/A'}</p>
-                                <p>Published: ${book.publishedYear || 'N/A'}</p>
-                                <p>Author: ${book.author ? `${book.author.firstName} ${book.author.lastName}` : 'Unknown'}</p>
                             </div>
                         </div>
                     `;
@@ -182,14 +217,14 @@
             try {
                 const response = await fetch(`${AUTHORS_API}/${id}`);
                 const author = await response.json();
-                
+
                 document.getElementById('authorId').value = author.id;
                 document.getElementById('firstName').value = author.firstName;
                 document.getElementById('lastName').value = author.lastName;
                 document.getElementById('biography').value = author.biography || '';
-                
-                document.getElementById('authorFormTitle').textContent = 'Edit Author';
-                document.getElementById('authorSubmitBtn').textContent = 'Update Author';
+
+                document.getElementById('authorFormTitle').textContent = 'Muuda Autor';
+                document.getElementById('authorSubmitBtn').textContent = 'Salvesta Muudatused';
                 document.getElementById('authorCancelBtn').style.display = 'inline-block';
                 editingAuthorId = id;
             } catch (error) {
@@ -202,7 +237,7 @@
             try {
                 const response = await fetch(`${BOOKS_API}/${id}`);
                 const book = await response.json();
-                
+
                 document.getElementById('bookId').value = book.id;
                 document.getElementById('bookTitle').value = book.title;
                 document.getElementById('bookIsbn').value = book.isbn || '';
@@ -222,7 +257,7 @@
 
         // Delete author
         async function deleteAuthor(id) {
-            if (confirm('Are you sure you want to delete this author? This will also delete all their books.')) {
+            if (confirm('Kas olete kindel, et soovite kustutada selle autori? See kustutab ka kõik tema raamatud.')) {
                 try {
                     await fetch(`${AUTHORS_API}/${id}`, {
                         method: 'DELETE'
@@ -237,7 +272,7 @@
 
         // Delete book
         async function deleteBook(id) {
-            if (confirm('Are you sure you want to delete this book?')) {
+            if (confirm('Kas olete kindel, et soovite kustutada selle raamatu?')) {
                 try {
                     await fetch(`${BOOKS_API}/${id}`, {
                         method: 'DELETE'
@@ -253,8 +288,8 @@
         function resetAuthorForm() {
             document.getElementById('authorForm').reset();
             document.getElementById('authorId').value = '';
-            document.getElementById('authorFormTitle').textContent = 'Add Author';
-            document.getElementById('authorSubmitBtn').textContent = 'Add Author';
+            document.getElementById('authorFormTitle').textContent = 'Lisa Autor';
+            document.getElementById('authorSubmitBtn').textContent = 'Salvesta';
             document.getElementById('authorCancelBtn').style.display = 'none';
             editingAuthorId = null;
         }
@@ -263,8 +298,8 @@
         function resetBookForm() {
             document.getElementById('bookForm').reset();
             document.getElementById('bookId').value = '';
-            document.getElementById('bookFormTitle').textContent = 'Add Book';
-            document.getElementById('bookSubmitBtn').textContent = 'Add Book';
+            document.getElementById('bookFormTitle').textContent = 'Lisa Raamat';
+            document.getElementById('bookSubmitBtn').textContent = 'Salvesta';
             document.getElementById('bookCancelBtn').style.display = 'none';
             editingBookId = null;
         }
@@ -277,14 +312,14 @@
                 lastName: document.getElementById('lastName').value,
                 biography: document.getElementById('biography').value
             };
-            
+
             try {
                 const url = editingAuthorId 
                     ? `${AUTHORS_API}/${editingAuthorId}`
                     : `${AUTHORS_API}`;
                 
                 const method = editingAuthorId ? 'PUT' : 'POST';
-                
+
                 const response = await fetch(url, {
                     method: method,
                     headers: {
@@ -292,7 +327,7 @@
                     },
                     body: JSON.stringify(authorData)
                 });
-                
+
                 if (response.ok) {
                     resetAuthorForm();
                     loadAuthors();
