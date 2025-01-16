@@ -55,43 +55,41 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card mb-4 form-card">
-                    <div class="card-header">
-                        <h3 id="bookFormTitle" class="mb-0">
-                            <i class="fas fa-book me-2"></i>Lisa Raamat
-                        </h3>
+        </div>
+
+        <!-- Book Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 id="bookFormTitle">Add Book</h3>
+            </div>
+            <div class="card-body">
+                <form id="bookForm">
+                    <input type="hidden" id="bookId">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" id="bookTitle" required>
                     </div>
-                    <div class="card-body">
-                        <form id="bookForm">
-                            <input type="hidden" id="bookId">
-                            <div class="mb-3">
-                                <label class="form-label">Pealkiri</label>
-                                <input type="text" class="form-control" id="title" required placeholder="Sisesta raamatu pealkiri">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">ISBN</label>
-                                <input type="text" class="form-control" id="isbn" placeholder="Sisesta raamatu ISBN">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Ilmumisaasta</label>
-                                <input type="number" class="form-control" id="publishedYear" placeholder="Sisesta raamatu ilmumisaasta">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Autor</label>
-                                <select class="form-control" id="authorSelect" required>
-                                    <option value="">Vali autor</option>
-                                </select>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <button type="submit" class="btn btn-primary" id="bookSubmitBtn">
-                                    <i class="fas fa-save me-2"></i>Salvesta
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="bookCancelBtn" style="display: none;">
-                                    <i class="fas fa-times me-2"></i>Tühista
-                                </button>
-                            </div>
-                        </form>
+                    <div class="mb-3">
+                        <label class="form-label">ISBN</label>
+                        <input type="text" class="form-control" id="bookIsbn">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Published Year</label>
+                        <input type="number" class="form-control" id="bookYear">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="bookDescription"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" step="0.01" class="form-control" id="bookPrice">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Author</label>
+                        <select class="form-control" id="bookAuthor" required>
+                            <option value="">Select an author</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -125,49 +123,53 @@
         </div>
     </div>
 
+    <script>
+        // API endpoints - automatically use the current domain
+        const API_URL = window.location.origin + '/api';
+        const BOOKS_API = `${API_URL}/books`;
+        const AUTHORS_API = `${API_URL}/authors`;
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_URL = 'http://localhost:5000/api';
         let editingAuthorId = null;
         let editingBookId = null;
 
         // Load authors
         async function loadAuthors() {
             try {
-                const response = await fetch(`${API_URL}/authors`);
+                const response = await fetch(`${AUTHORS_API}`);
                 const authors = await response.json();
-                const select = document.getElementById('authorSelect');
+                const select = document.getElementById('bookAuthor');
                 const authorsList = document.getElementById('authorsList');
-
-                select.innerHTML = '<option value="">Vali autor</option>';
-                authorsList.innerHTML = '';
-
-                authors.forEach(author => {
-                    select.innerHTML += `
-                        <option value="${author.id}">${author.firstName} ${author.lastName}</option>
-                    `;
-
-                    authorsList.innerHTML += `
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
+                
+                if (select) {
+                    select.innerHTML = '<option value="">Select an author</option>';
+                    authors.forEach(author => {
+                        select.innerHTML += `
+                            <option value="${author.id}">${author.firstName} ${author.lastName}</option>
+                        `;
+                    });
+                }
+                
+                if (authorsList) {
+                    authorsList.innerHTML = '';
+                    authors.forEach(author => {
+                        authorsList.innerHTML += `
+                            <div class="card mb-2">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5>${author.firstName} ${author.lastName}</h5>
                                         <div>
-                                            <button class="btn btn-sm btn-primary" onclick="editAuthor(${author.id})">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteAuthor(${author.id})">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <button class="btn btn-sm btn-primary" onclick="editAuthor(${author.id})">Edit</button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteAuthor(${author.id})">Delete</button>
                                         </div>
                                     </div>
-                                    <p>${author.biography || 'Biograafia puudub'}</p>
+                                    <p class="mt-2 mb-0">${author.biography || 'No biography available'}</p>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
             } catch (error) {
                 console.error('Error loading authors:', error);
             }
@@ -176,7 +178,7 @@
         // Load books
         async function loadBooks() {
             try {
-                const response = await fetch(`${API_URL}/books`);
+                const response = await fetch(`${BOOKS_API}`);
                 const books = await response.json();
                 const booksList = document.getElementById('booksList');
 
@@ -213,7 +215,7 @@
         // Edit author
         async function editAuthor(id) {
             try {
-                const response = await fetch(`${API_URL}/authors/${id}`);
+                const response = await fetch(`${AUTHORS_API}/${id}`);
                 const author = await response.json();
 
                 document.getElementById('authorId').value = author.id;
@@ -233,17 +235,19 @@
         // Edit book
         async function editBook(id) {
             try {
-                const response = await fetch(`${API_URL}/books/${id}`);
+                const response = await fetch(`${BOOKS_API}/${id}`);
                 const book = await response.json();
 
                 document.getElementById('bookId').value = book.id;
-                document.getElementById('title').value = book.title;
-                document.getElementById('isbn').value = book.isbn || '';
-                document.getElementById('publishedYear').value = book.publishedYear || '';
-                document.getElementById('authorSelect').value = book.authorId;
-
-                document.getElementById('bookFormTitle').textContent = 'Muuda Raamat';
-                document.getElementById('bookSubmitBtn').textContent = 'Salvesta Muudatused';
+                document.getElementById('bookTitle').value = book.title;
+                document.getElementById('bookIsbn').value = book.isbn || '';
+                document.getElementById('bookYear').value = book.publishedYear || '';
+                document.getElementById('bookDescription').value = book.description || '';
+                document.getElementById('bookPrice').value = book.price || '';
+                document.getElementById('bookAuthor').value = book.authorId;
+                
+                document.getElementById('bookFormTitle').textContent = 'Edit Book';
+                document.getElementById('bookSubmitBtn').textContent = 'Update Book';
                 document.getElementById('bookCancelBtn').style.display = 'inline-block';
                 editingBookId = id;
             } catch (error) {
@@ -255,7 +259,7 @@
         async function deleteAuthor(id) {
             if (confirm('Kas olete kindel, et soovite kustutada selle autori? See kustutab ka kõik tema raamatud.')) {
                 try {
-                    await fetch(`${API_URL}/authors/${id}`, {
+                    await fetch(`${AUTHORS_API}/${id}`, {
                         method: 'DELETE'
                     });
                     loadAuthors();
@@ -270,7 +274,7 @@
         async function deleteBook(id) {
             if (confirm('Kas olete kindel, et soovite kustutada selle raamatu?')) {
                 try {
-                    await fetch(`${API_URL}/books/${id}`, {
+                    await fetch(`${BOOKS_API}/${id}`, {
                         method: 'DELETE'
                     });
                     loadBooks();
@@ -310,10 +314,10 @@
             };
 
             try {
-                const url = editingAuthorId
-                    ? `${API_URL}/authors/${editingAuthorId}`
-                    : `${API_URL}/authors`;
-
+                const url = editingAuthorId 
+                    ? `${AUTHORS_API}/${editingAuthorId}`
+                    : `${AUTHORS_API}`;
+                
                 const method = editingAuthorId ? 'PUT' : 'POST';
 
                 const response = await fetch(url, {
@@ -337,18 +341,60 @@
         document.getElementById('bookForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const bookData = {
-                title: document.getElementById('title').value,
-                isbn: document.getElementById('isbn').value,
-                publishedYear: document.getElementById('publishedYear').value,
-                authorId: document.getElementById('authorSelect').value
+                title: document.getElementById('bookTitle').value.trim(),
+                isbn: document.getElementById('bookIsbn').value.trim() || null,
+                publishedYear: parseInt(document.getElementById('bookYear').value) || null,
+                description: document.getElementById('bookDescription').value.trim() || null,
+                price: parseFloat(document.getElementById('bookPrice').value) || 0,
+                authorId: parseInt(document.getElementById('bookAuthor').value)
             };
 
-            try {
-                const url = editingBookId
-                    ? `${API_URL}/books/${editingBookId}`
-                    : `${API_URL}/books`;
+            console.log('Form data collected:', {
+                title: document.getElementById('bookTitle').value,
+                isbn: document.getElementById('bookIsbn').value,
+                publishedYear: document.getElementById('bookYear').value,
+                description: document.getElementById('bookDescription').value,
+                price: document.getElementById('bookPrice').value,
+                authorId: document.getElementById('bookAuthor').value
+            });
+            
+            console.log('Processed book data:', bookData);
 
+            // Validate required fields
+            if (!bookData.title) {
+                alert('Title is required');
+                return;
+            }
+            if (!bookData.authorId) {
+                alert('Please select an author');
+                return;
+            }
+
+            // Validate publishedYear
+            const currentYear = new Date().getFullYear();
+            if (bookData.publishedYear && (bookData.publishedYear < 1000 || bookData.publishedYear > currentYear)) {
+                alert(`Published year must be between 1000 and ${currentYear}`);
+                return;
+            }
+
+            // Validate price
+            if (bookData.price < 0) {
+                alert('Price cannot be negative');
+                return;
+            }
+            
+            try {
+                const url = editingBookId 
+                    ? `${BOOKS_API}/${editingBookId}`
+                    : BOOKS_API;
+                
                 const method = editingBookId ? 'PUT' : 'POST';
+                
+                console.log('Sending request:', {
+                    url,
+                    method,
+                    data: bookData
+                });
 
                 const response = await fetch(url, {
                     method: method,
@@ -358,12 +404,22 @@
                     body: JSON.stringify(bookData)
                 });
 
-                if (response.ok) {
-                    resetBookForm();
-                    loadBooks();
+                const data = await response.json();
+                console.log('Server response:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data
+                });
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save book');
                 }
+
+                resetBookForm();
+                loadBooks();
             } catch (error) {
                 console.error('Error saving book:', error);
+                alert(error.message);
             }
         });
 
